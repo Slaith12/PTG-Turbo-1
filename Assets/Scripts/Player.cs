@@ -1,9 +1,7 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-[SuppressMessage("ReSharper", "Unity.InefficientPropertyAccess")]
 public class Player : MonoBehaviour
 {
     public Vector3 stepToTheRight;
@@ -28,6 +26,9 @@ public class Player : MonoBehaviour
     private Vector3 _targetVector3;
     private Quaternion _targetRotation;
 
+    [SerializeField] GameObject gameOverScreen;
+    [SerializeField] Animator animator;
+
     private void Start()
     {
         _slideAngle = Quaternion.Euler(slideAngle);
@@ -39,20 +40,22 @@ public class Player : MonoBehaviour
         _targetScale = _baseScale;
         _steps = new[] {_basePosition - stepToTheRight, _basePosition, _basePosition + stepToTheRight};
         currentPosition = 1;
+
+        gameOverScreen.SetActive(false);
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
         {
             currentPosition = Math.Max(0, currentPosition - 1);
         }
-        else if (Input.GetKeyDown(KeyCode.RightArrow))
+        else if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D))
         {
             currentPosition = Math.Min(2, currentPosition + 1);
         }
 
-        _targetRotation = Input.GetKey(KeyCode.DownArrow) ? _slideAngle : _baseAngle;
+        _targetRotation = Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S) ? _slideAngle : _baseAngle;
 
         _targetVector3 = _steps[currentPosition];
 
@@ -75,5 +78,14 @@ public class Player : MonoBehaviour
         }
         
         transform.rotation = Quaternion.Lerp(transform.rotation, _targetRotation, lerpFrac * Time.deltaTime);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        gameOverScreen.SetActive(true);
+        animator.SetTrigger("Die");
+        Obstacle.Speed = 0;
+        GameDirector.director.enabled = false;
+        this.enabled = false;
     }
 }

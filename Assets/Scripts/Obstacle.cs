@@ -1,13 +1,13 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 
-[SuppressMessage("ReSharper", "Unity.InefficientPropertyAccess")]
 public class Obstacle : MonoBehaviour
 {
     // pretend like its the train from Subway Surfers
     public static float Speed = 20f;
     private static readonly Vector3 Motion = new Vector3(-1, 0, 0);
-    
+    [SerializeField] float despawnX = -10;
+
     private void Start()
     {
         var position = transform.position;
@@ -18,5 +18,7 @@ public class Obstacle : MonoBehaviour
     private void Update()
     {
         transform.position += Motion * (Speed * Time.deltaTime);
+        if (transform.position.x < despawnX)
+            Destroy(gameObject);
     }
 }
